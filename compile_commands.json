@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug",
+  "command": "/usr/bin/g++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug/calc-qt6_autogen/include -isystem /usr/include/qt6/QtCore -isystem /usr/include/qt6 -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6/QtGui -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always -mno-direct-extern-access -o CMakeFiles/calc-qt6.dir/calc-qt6_autogen/mocs_compilation.cpp.o -c /mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug/calc-qt6_autogen/mocs_compilation.cpp",
+  "file": "/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug/calc-qt6_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/calc-qt6.dir/calc-qt6_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug",
+  "command": "/usr/bin/g++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug/calc-qt6_autogen/include -isystem /usr/include/qt6/QtCore -isystem /usr/include/qt6 -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6/QtGui -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always -mno-direct-extern-access -o CMakeFiles/calc-qt6.dir/main.cpp.o -c /mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/main.cpp",
+  "file": "/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/main.cpp",
+  "output": "CMakeFiles/calc-qt6.dir/main.cpp.o"
+},
+{
+  "directory": "/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug",
+  "command": "/usr/bin/g++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/build/Desktop-Debug/calc-qt6_autogen/include -isystem /usr/include/qt6/QtCore -isystem /usr/include/qt6 -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtWidgets -isystem /usr/include/qt6/QtGui -DQT_QML_DEBUG -g -std=gnu++17 -fdiagnostics-color=always -mno-direct-extern-access -o CMakeFiles/calc-qt6.dir/mainwindow.cpp.o -c /mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/mainwindow.cpp",
+  "file": "/mnt/windows/Users/thego/Documents/Dev/github.com/4ry1337/calc-qt6/mainwindow.cpp",
+  "output": "CMakeFiles/calc-qt6.dir/mainwindow.cpp.o"
+}
+]
