@@ -2,12 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QBoxLayout>
-#include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
-#include <QMap>
 #include <QPushButton>
-#include <functional>
+#include <QStack>
+#include <QString>
+#include <QStringLiteral>
+#include <unordered_set>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,50 +18,62 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
-
 public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
 private slots:
   void on_clear();
-  void on_change_sign();
-  void on_pow();
-  void on_sqrt();
-  void on_add();
-  void on_subtract();
+  void on_digit();
+  void on_dot();
+  void on_backspace();
+  void on_percent();
+  void on_parentheses();
+  void on_operator();
   void on_equal();
-  void on_comma();
-  void on_digit(); // Handles all digit buttons dynamically
 
 private:
-  QWidget *centralWidget;
-  QLabel *historyDisplay;
-  QLabel *mainDisplay;
-  QVBoxLayout *mainLayout;
-  QGridLayout *gridLayout;
-  QLabel *label;
+  static constexpr int ROWS = 5;
+  static constexpr int COLS = 4;
+  static constexpr const char *ADD = "+";
+  static constexpr const char *SUBTRACT = "-";
+  static constexpr const char *MULTIPLY = "x";
+  static constexpr const char *DIVIDE = "÷";
+  static constexpr const char *PERCENT = "%";
+  static constexpr const char *DOT = ".";
+  static constexpr const char *PARENTHESES = "()";
+  static constexpr const char *EQUAL = "=";
+  static constexpr const char *CLEAR = "C";
+  static constexpr const char *BACKSPACE = "<";
+  const std::unordered_set<QString> m_operators{ADD, SUBTRACT, MULTIPLY,
+                                                DIVIDE};
 
-  const QString button_order[5][4] = {{"AC", "+/-", "xʸ", "√x"},
-                                      {"7", "8", "9", "/"},
-                                      {"4", "5", "6", "*"},
-                                      {"1", "2", "3", "-"},
-                                      {"0", ".", "=", "+"}};
+  bool m_last_dot = false;
+  int m_parenthesis_count = 0;
 
-  QPushButton *buttons[5][4];
+  QLabel *m_main_display = nullptr;
+  QLabel *m_result_display = nullptr;
 
-  // Static map of button actions
+  QPushButton *m_buttons[ROWS][COLS];
+
+  const QString m_button_layout[ROWS][COLS] = {
+      {CLEAR, BACKSPACE, PARENTHESES, EQUAL},
+      {"7", "8", "9", DIVIDE},
+      {"4", "5", "6", MULTIPLY},
+      {"1", "2", "3", SUBTRACT},
+      {PERCENT, "0", DOT, ADD}};
+
   const QMap<QString, std::function<void()>> button_actions = {
-      {"AC", [this]() { on_clear(); }},
-      {"+/-", [this]() { on_change_sign(); }},
-      {"xʸ", [this]() { on_pow(); }},
-      {"√x", [this]() { on_sqrt(); }},
-      {"+", [this]() { on_add(); }},
-      {"-", [this]() { on_subtract(); }},
-      {"=", [this]() { on_equal(); }},
-      {".", [this]() { on_comma(); }},
-
-      // Digits are mapped to the same function
+      {CLEAR, [this]() { on_clear(); }},
+      {EQUAL, [this]() { on_equal(); }},
+      {ADD, [this]() { on_operator(); }},
+      {SUBTRACT, [this]() { on_operator(); }},
+      {MULTIPLY, [this]() { on_operator(); }},
+      {DIVIDE, [this]() { on_operator(); }},
+      {PARENTHESES, [this]() { on_parentheses(); }},
+      {PERCENT, [this]() { on_percent(); }},
+      {DOT, [this]() { on_dot(); }},
+      {BACKSPACE, [this]() { on_backspace(); }},
       {"0", [this]() { on_digit(); }},
       {"1", [this]() { on_digit(); }},
       {"2", [this]() { on_digit(); }},
@@ -71,6 +84,20 @@ private:
       {"7", [this]() { on_digit(); }},
       {"8", [this]() { on_digit(); }},
       {"9", [this]() { on_digit(); }}};
+
+  [[nodiscard]] bool is_operator(QStringView expression) const;
+  [[nodiscard]] bool is_parenthesis(QChar ch) const;
+  [[nodiscard]] QString validate_expression(QStringView expression) const;
+  [[nodiscard]] double evaluate_expression(const QString &expression) const;
+  [[nodiscard]] static int precedence(QStringView op);
+
+  void update_display(const QString &expression);
+  [[nodiscard]] bool
+  evaluate_partial_expression(const QString &expression) const;
+  [[nodiscard]] QString partial_expression(const QString &expression) const;
+
+  void setup_ui();
+  void connect_buttons();
 };
 
 #endif // MAINWINDOW_H
