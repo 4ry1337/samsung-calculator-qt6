@@ -80,16 +80,26 @@ void MainWindow::on_clear() {
 
 void MainWindow::on_equal() {
   QString expression = m_main_display->text();
-
   QString error = validate_expression(expression);
 
   if (!error.isEmpty()) {
     m_result_display->setText(error);
     return;
   }
-  double result = evaluate_expression(expression);
-  m_main_display->setText(QString::number(result));
-  m_result_display->setText("");
+
+  try {
+    double result = evaluate_expression(expression);
+    if (std::isinf(result) || std::isnan(result)) {
+      m_result_display->setText("Division by zero");
+      return;
+    }
+    m_main_display->setText(QString::number(result));
+    m_result_display->setText("");
+  } catch (const std::runtime_error &e) {
+    m_result_display->setText(e.what());
+  } catch (...) {
+    m_result_display->setText("Error");
+  }
   m_last_dot = false;
   m_parenthesis_count = 0;
 }
@@ -184,16 +194,38 @@ void MainWindow::on_digit() {
   QString digit = button->text();
   QString expression = m_main_display->text();
 
-  if (expression == "0")
-    expression = digit;
-  else {
-    if (!expression.isEmpty() &&
-        (expression.back() == ')' || expression.back() == PERCENT)) {
-      expression += MULTIPLY;
+  auto findLastDelimiter = [&](const QString &expr) -> int {
+    static const QString delimiters = "+-x÷()%";
+    for (int i = expr.size() - 1; i >= 0; --i) {
+      if (delimiters.contains(expr[i])) {
+        return i;
+      }
     }
-    expression += digit;
+    return -1; // No delimiter found
+  };
+
+  if (expression.isEmpty()) {
+    update_display(digit);
+    return;
   }
-  update_display(expression);
+
+  if (expression.back() == ')' || expression.back() == '%') {
+    expression += MULTIPLY;
+  }
+
+  int delimiterIndex = findLastDelimiter(expression);
+  QString currentToken = expression.mid(delimiterIndex + 1);
+  if (currentToken == "0") {
+    if (digit == "0") {
+      return;
+    } else {
+      expression.chop(1);
+      expression += digit;
+      update_display(expression);
+      return;
+    }
+  }
+  update_display(expression + digit);
 }
 
 QString MainWindow::validate_expression(QStringView expression) const {
