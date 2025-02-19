@@ -8,7 +8,7 @@
 #include <QStack>
 #include <QString>
 #include <QStringLiteral>
-#include <unordered_set>
+#include <qcontainerfwd.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -35,21 +35,20 @@ private slots:
 private:
   static constexpr int ROWS = 5;
   static constexpr int COLS = 4;
+
   static constexpr const char *ADD = "+";
   static constexpr const char *SUBTRACT = "-";
   static constexpr const char *MULTIPLY = "x";
   static constexpr const char *DIVIDE = "÷";
+
   static constexpr const char *PERCENT = "%";
   static constexpr const char *DOT = ".";
+
   static constexpr const char *PARENTHESES = "()";
+
   static constexpr const char *EQUAL = "=";
   static constexpr const char *CLEAR = "C";
   static constexpr const char *BACKSPACE = "<";
-  const std::unordered_set<QString> m_operators{ADD, SUBTRACT, MULTIPLY,
-                                                DIVIDE};
-
-  bool m_last_dot = false;
-  int m_parenthesis_count = 0;
 
   QLabel *m_main_display = nullptr;
   QLabel *m_result_display = nullptr;
@@ -84,20 +83,6 @@ private:
       {"7", [this]() { on_digit(); }},
       {"8", [this]() { on_digit(); }},
       {"9", [this]() { on_digit(); }}};
-
-  [[nodiscard]] bool is_operator(QStringView expression) const;
-  [[nodiscard]] bool is_parenthesis(QChar ch) const;
-  [[nodiscard]] QString validate_expression(QStringView expression) const;
-  [[nodiscard]] double evaluate_expression(const QString &expression) const;
-  [[nodiscard]] static int precedence(QStringView op);
-
-  void update_display(const QString &expression);
-  [[nodiscard]] bool
-  evaluate_partial_expression(const QString &expression) const;
-  [[nodiscard]] QString partial_expression(const QString &expression) const;
-
-  void setup_ui();
-  void connect_buttons();
 };
 
 #endif // MAINWINDOW_H
