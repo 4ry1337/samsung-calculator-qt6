@@ -100,7 +100,7 @@ void MainWindow::on_equal() {
   } catch (...) {
     m_result_display->setText("Error");
   }
-  m_last_dot = false;
+  m_last_dot = m_main_display->text().contains('.');
   m_parenthesis_count = 0;
 }
 
@@ -162,15 +162,16 @@ void MainWindow::on_operator() {
   QString op = button->text();
   QString expression = m_main_display->text();
 
-  if (expression.isEmpty())
+  if (expression.isEmpty() && op != ADD && op != SUBTRACT)
     return;
 
-  if (is_operator(expression) || expression.back() == DOT) {
+  if (!expression.isEmpty() &&
+      (is_operator(expression) || expression.back() == DOT)) {
     expression.chop(1);
-    update_display(expression);
   }
 
-  if (expression.back() == '(' && !(op == ADD || op == SUBTRACT))
+  if (!expression.isEmpty() && expression.back() == '(' && op != ADD &&
+      op != SUBTRACT)
     return;
 
   update_display(expression + op);
@@ -287,10 +288,11 @@ double MainWindow::evaluate_expression(const QString &expression) const {
   QStack<QString> operators;
   QString currentNumber;
 
-  auto processOperator = [&values, &operators](const QString &op) {
-    double val2 = values.pop();
-    double val1 = values.pop();
+  bool expectingUnary = true;
 
+  auto processOperator = [&](const QString &op) {
+    double val2 = values.pop();
+    double val1 = values.isEmpty() ? 0.0 : values.pop();
     switch (op.front().unicode()) {
     case '+':
       values.push(val1 + val2);
@@ -307,53 +309,80 @@ double MainWindow::evaluate_expression(const QString &expression) const {
     }
   };
 
-  for (const QChar &ch : expression) {
+  for (QChar ch : expression) {
     if (ch.isDigit() || ch == '.') {
       currentNumber += ch;
-      continue;
-    }
-
-    if (!currentNumber.isEmpty()) {
-      values.push(currentNumber.toDouble());
-      currentNumber.clear();
-    }
-
-    if (ch == '(') {
-      operators.push(QString(ch));
+      expectingUnary = false;
+    } else if (ch == '(') {
+      if (!currentNumber.isEmpty()) {
+        values.push(currentNumber.toDouble());
+        currentNumber.clear();
+      }
+      operators.push("(");
+      expectingUnary = true;
     } else if (ch == ')') {
+      if (!currentNumber.isEmpty()) {
+        values.push(currentNumber.toDouble());
+        currentNumber.clear();
+      }
       while (!operators.isEmpty() && operators.top() != "(") {
         processOperator(operators.pop());
       }
-      operators.pop();
-    } else if (m_operators.count(QString(ch)) != 0) {
-      while (!operators.isEmpty() &&
-             precedence(operators.top()) >= precedence(QString(ch))) {
-        processOperator(operators.pop());
+      if (!operators.isEmpty()) {
+        operators.pop();
       }
-      operators.push(QString(ch));
+      expectingUnary = false;
+    } else if (m_operators.count(QString(ch)) != 0) {
+      if (expectingUnary && ch == '-') {
+        currentNumber = "-" + currentNumber;
+      } else {
+        if (!currentNumber.isEmpty()) {
+          values.push(currentNumber.toDouble());
+          currentNumber.clear();
+        }
+        while (!operators.isEmpty() &&
+               precedence(operators.top()) >= precedence(QString(ch))) {
+          processOperator(operators.pop());
+        }
+        operators.push(QString(ch));
+        expectingUnary = true;
+      }
     } else if (ch == '%') {
-      if (!values.isEmpty()) {
-        double val = values.pop();
+      if (!currentNumber.isEmpty()) {
+        double val = currentNumber.toDouble();
+        currentNumber.clear();
         if (!operators.isEmpty() &&
             (operators.top() == "+" || operators.top() == "-")) {
-          values.push(val / 100.0 * values.top());
+          if (!values.isEmpty()) {
+            double baseVal = values.pop();
+            val = baseVal * (val / 100.0);
+          } else {
+            val = val / 100.0;
+          }
         } else {
-          values.push(val / 100.0);
+          val = val / 100.0;
         }
+        values.push(val);
       }
+      expectingUnary = false;
     }
   }
-
-  if (!currentNumber.isEmpty()) {
+  if (!currentNumber.isEmpty())
     values.push(currentNumber.toDouble());
-  }
-
-  while (!operators.isEmpty()) {
+  while (!operators.isEmpty())
     processOperator(operators.pop());
-  }
-
   return values.isEmpty() ? 0.0 : values.top();
 }
+
+/* if (!values.isEmpty()) {
+  double val = values.pop();
+  if (!operators.isEmpty() &&
+      (operators.top() == "+" || operators.top() == "-")) {
+    values.push(val / 100.0 * values.top());
+  } else {
+    values.push(val / 100.0);
+  }
+} */
 
 void MainWindow::update_display(const QString &expression) {
   m_main_display->setText(expression);
